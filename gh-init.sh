@@ -7,15 +7,15 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Parse command line arguments
-PRIVATE=false
+PRIVATE=true
 while getopts "ph" opt; do
     case $opt in
         p)
-            PRIVATE=true
+            PRIVATE=false
             ;;
         h)
             echo "Usage: $0 [-p] [-h]"
-            echo "  -p    Create a private repository (default: public)"
+            echo "  -p    Create a public repository (default: private)"
             echo "  -h    Show this help message"
             exit 0
             ;;

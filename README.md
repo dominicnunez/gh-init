@@ -8,7 +8,7 @@ A simple bash script to initialize a git repository and create a corresponding G
 - Creates a `.gitignore` file with common patterns
 - Makes an initial commit
 - Authenticates with GitHub if needed
-- Creates a GitHub repository (public or private)
+- Creates a private GitHub repository by default (use `-p` for public)
 - Pushes your code to GitHub
 - All with a single command
 
@@ -39,19 +39,21 @@ Navigate to your project directory and run:
 ./gh-init.sh
 ```
 
+**Important:** The GitHub repository will be named after your current directory. For example, if you run the script in `/home/user/my-project/`, the repository will be created as `my-project`.
+
 ### Options
 
-- `-p` - Create a private repository (default is public)
+- `-p` - Create a public repository (default is private)
 - `-h` - Show help message
 
 ### Examples
 
-Create a public repository:
+Create a private repository:
 ```bash
 ./gh-init.sh
 ```
 
-Create a private repository:
+Create a public repository:
 ```bash
 ./gh-init.sh -p
 ```
@@ -70,11 +72,6 @@ Create a private repository:
 
 ## Notes
 
-- The repository name is based on your current directory name
 - If a `.gitignore` file already exists, it won't be overwritten
 - The script will exclude itself (`gh-init.sh`) from being committed
 - If the directory is already a git repository, you'll be prompted to confirm continuation
-
-## License
-
-This project is open source and available under the MIT License.
