@@ -8,14 +8,19 @@ NC='\033[0m' # No Color
 
 # Parse command line arguments
 PRIVATE=true
-while getopts "ph" opt; do
+EXISTING=false
+while getopts "peh" opt; do
     case $opt in
         p)
             PRIVATE=false
             ;;
+        e)
+            EXISTING=true
+            ;;
         h)
-            echo "Usage: $0 [-p] [-h]"
+            echo "Usage: $0 [-p] [-e] [-h]"
             echo "  -p    Create a public repository (default: private)"
+            echo "  -e    Use existing .git repository (skip git init)"
             echo "  -h    Show this help message"
             exit 0
             ;;
@@ -30,10 +35,17 @@ done
 # Get the current directory name as repo name
 REPO_NAME=$(basename "$PWD")
 
-# Check if already a git repo - exit immediately
+# Check existing git repository status
 if [ -d .git ]; then
-    echo -e "${RED}Error: This directory is already a git repository.${NC}"
-    exit 1
+    if [ "$EXISTING" = false ]; then
+        echo -e "${RED}Error: This directory is already a git repository.${NC}"
+        exit 1
+    fi
+else
+    if [ "$EXISTING" = true ]; then
+        echo -e "${RED}Error: No .git directory found. Use without -e to initialize.${NC}"
+        exit 1
+    fi
 fi
 
 echo -e "${GREEN}GitHub Repository Initializer${NC}"
@@ -59,9 +71,11 @@ if gh repo view "$REPO_NAME" &> /dev/null; then
     exit 1
 fi
 
-# Initialize git repo
-echo -e "${GREEN}Initializing git repository...${NC}"
-git init
+# Initialize git repo (skip for existing repos)
+if [ "$EXISTING" = false ]; then
+    echo -e "${GREEN}Initializing git repository...${NC}"
+    git init
+fi
 
 # Create .gitignore if it doesn't exist
 if [ ! -f .gitignore ]; then
@@ -122,13 +136,21 @@ EOF
     fi
 fi
 
-# Create initial commit
-echo -e "${GREEN}Creating initial commit...${NC}"
-git add .
-git commit -m "Initial commit"
+# Create initial commit if needed
+if ! git rev-parse --verify HEAD &> /dev/null; then
+    echo -e "${GREEN}Creating initial commit...${NC}"
+    git add .
+    git commit -m "Initial commit"
+fi
 
 # Create GitHub repository
 echo -e "${GREEN}Creating GitHub repository: $REPO_NAME${NC}"
+
+# Fail if origin exists when using -e
+if [ "$EXISTING" = true ] && git remote get-url origin &> /dev/null; then
+    echo -e "${RED}Error: Remote 'origin' already exists. Remove or rename it before using -e.${NC}"
+    exit 1
+fi
 
 # Set visibility based on flag
 if [ "$PRIVATE" = true ]; then
@@ -140,9 +162,7 @@ else
 fi
 
 # Create the repo
-gh repo create "$REPO_NAME" $VISIBILITY --source=. --remote=origin --push
-
-if [ $? -eq 0 ]; then
+if gh repo create "$REPO_NAME" $VISIBILITY --source=. --remote=origin --push; then
     echo -e "${GREEN}✓ Repository created successfully!${NC}"
     
     # Show repo URL
