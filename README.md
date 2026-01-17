@@ -4,7 +4,7 @@ A simple bash script to initialize a git repository and create a corresponding G
 
 ## Features
 
-- Initializes a local git repository if one doesn't exist
+- Initializes a local git repository
 - Creates a `.gitignore` file with common patterns
 - Makes an initial commit
 - Authenticates with GitHub if needed
@@ -24,11 +24,11 @@ A simple bash script to initialize a git repository and create a corresponding G
 1. Clone or download this repository
 2. Make the script executable:
    ```bash
-   chmod +x gh-init.sh
+   chmod +x init.sh
    ```
 3. Optionally, move it to a directory in your PATH for easy access:
    ```bash
-   sudo mv gh-init.sh /usr/local/bin/gh-init
+   sudo mv init.sh /usr/local/bin/init
    ```
 
 ## Usage
@@ -36,7 +36,7 @@ A simple bash script to initialize a git repository and create a corresponding G
 Navigate to your project directory and run:
 
 ```bash
-./gh-init.sh
+./init.sh
 ```
 
 **Important:** The GitHub repository will be named after your current directory. For example, if you run the script in `/home/user/my-project/`, the repository will be created as `my-project`.
@@ -50,28 +50,29 @@ Navigate to your project directory and run:
 
 Create a private repository:
 ```bash
-./gh-init.sh
+./init.sh
 ```
 
 Create a public repository:
 ```bash
-./gh-init.sh -p
+./init.sh -p
 ```
 
 ## What It Does
 
-1. Checks if GitHub CLI is installed
-2. Checks if the directory is already a git repository
-3. Initializes git if needed
-4. Authenticates with GitHub (prompts if not authenticated)
-5. Creates a `.gitignore` file if one doesn't exist
-6. Makes an initial commit
-7. Creates a GitHub repository with the same name as your directory
-8. Sets up the remote and pushes your code
-9. Displays the URL of your new repository
+1. Checks if the directory is already a git repository (exits if so)
+2. Checks if GitHub CLI is installed
+3. Authenticates with GitHub (prompts if not authenticated)
+4. Checks if a repository with that name already exists on GitHub (exits if so)
+5. Initializes git
+6. Creates a `.gitignore` file if one doesn't exist
+7. Makes an initial commit
+8. Creates a GitHub repository with the same name as your directory
+9. Sets up the remote and pushes your code
+10. Displays the URL of your new repository
 
 ## Notes
 
 - If a `.gitignore` file already exists, it won't be overwritten
-- The script will exclude itself (`gh-init.sh`) from being committed
-- If the directory is already a git repository, you'll be prompted to confirm continuation
+- The script will exclude itself (`init.sh`) from being committed
+- For public repos, planning files (`PRD.md`, `progress.txt`) and `.claude/` are automatically added to `.gitignore`
