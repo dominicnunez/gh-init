@@ -30,6 +30,12 @@ done
 # Get the current directory name as repo name
 REPO_NAME=$(basename "$PWD")
 
+# Check if already a git repo - exit immediately
+if [ -d .git ]; then
+    echo -e "${RED}Error: This directory is already a git repository.${NC}"
+    exit 1
+fi
+
 echo -e "${GREEN}GitHub Repository Initializer${NC}"
 echo -e "${GREEN}==============================${NC}"
 echo ""
@@ -41,19 +47,9 @@ if ! command -v gh &> /dev/null; then
     exit 1
 fi
 
-# Check if already a git repo
-if [ -d .git ]; then
-    echo -e "${YELLOW}Warning: This directory is already a git repository.${NC}"
-    read -p "Do you want to continue? (y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-else
-    # Initialize git repo
-    echo -e "${GREEN}Initializing git repository...${NC}"
-    git init
-fi
+# Initialize git repo
+echo -e "${GREEN}Initializing git repository...${NC}"
+git init
 
 # Check if authenticated with GitHub
 if ! gh auth status &> /dev/null; then
@@ -101,9 +97,27 @@ build/
 out/
 target/
 
-# Git init script
-gh-init.sh
+# Scripts
+init.sh
+ralph.sh
+ralphoc.sh
+
+# Nix flake build
+result
 EOF
+
+        # Add planning/AI entries only for public repos
+        if [ "$PRIVATE" = false ]; then
+            cat >> .gitignore << 'EOF'
+
+# Project planning
+PRD.md
+progress.txt
+
+# Claude
+.claude/
+EOF
+        fi
     fi
     
     # Add all files and commit
