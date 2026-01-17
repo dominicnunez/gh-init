@@ -47,24 +47,26 @@ if ! command -v gh &> /dev/null; then
     exit 1
 fi
 
-# Initialize git repo
-echo -e "${GREEN}Initializing git repository...${NC}"
-git init
-
 # Check if authenticated with GitHub
 if ! gh auth status &> /dev/null; then
     echo -e "${YELLOW}Not authenticated with GitHub. Running 'gh auth login'...${NC}"
     gh auth login
 fi
 
-# Create initial commit if no commits exist
-if ! git rev-parse HEAD &> /dev/null 2>&1; then
-    echo -e "${GREEN}Creating initial commit...${NC}"
-    
-    # Create .gitignore if it doesn't exist
-    if [ ! -f .gitignore ]; then
-        echo -e "${YELLOW}Creating basic .gitignore...${NC}"
-        cat > .gitignore << 'EOF'
+# Check if repo already exists on GitHub
+if gh repo view "$REPO_NAME" &> /dev/null; then
+    echo -e "${RED}Error: Repository '$REPO_NAME' already exists on GitHub.${NC}"
+    exit 1
+fi
+
+# Initialize git repo
+echo -e "${GREEN}Initializing git repository...${NC}"
+git init
+
+# Create .gitignore if it doesn't exist
+if [ ! -f .gitignore ]; then
+    echo -e "${YELLOW}Creating basic .gitignore...${NC}"
+    cat > .gitignore << 'EOF'
 # OS files
 .DS_Store
 Thumbs.db
@@ -106,9 +108,9 @@ ralphoc.sh
 result
 EOF
 
-        # Add planning/AI entries only for public repos
-        if [ "$PRIVATE" = false ]; then
-            cat >> .gitignore << 'EOF'
+    # Add planning/AI entries only for public repos
+    if [ "$PRIVATE" = false ]; then
+        cat >> .gitignore << 'EOF'
 
 # Project planning
 PRD.md
@@ -117,13 +119,13 @@ progress.txt
 # Claude
 .claude/
 EOF
-        fi
     fi
-    
-    # Add all files and commit
-    git add .
-    git commit -m "Initial commit"
 fi
+
+# Create initial commit
+echo -e "${GREEN}Creating initial commit...${NC}"
+git add .
+git commit -m "Initial commit"
 
 # Create GitHub repository
 echo -e "${GREEN}Creating GitHub repository: $REPO_NAME${NC}"
